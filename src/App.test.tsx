@@ -1,8 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import App from './App'
 import '@testing-library/jest-dom/extend-expect'
 import axios from 'axios'
 import { FetchAsyncApi } from './api'
+import React from 'react'
+import userEvent from '@testing-library/user-event'
 
 class Users {
     static all() {
@@ -19,7 +21,7 @@ describe('app', () => {
     test('it renders', () => {
         render(<App />)
         expect(
-            screen.getByText('Тестирования JavaScript и TypeScript кода.')
+            screen.getByText(/Тестирования JavaScript и TypeScript кода./i)
         ).toBeInTheDocument()
     })
     // Проверяем отрендерилась ли определенная кнопка
@@ -30,10 +32,23 @@ describe('app', () => {
     // Проверяем пришли ли данные с API
     test('display valute', async () => {
         render(<App />)
-        const userList = await waitFor(() =>
-            screen.getByText('Китайских юаней')
-        )
+        const userList = await screen.findByRole('option', {
+            name: /Китайских юаней/i,
+        })
         expect(userList).toBeInTheDocument()
+    })
+    // Тестируем выделенный элемент в списке
+    test('should allow user to change country', async () => {
+        render(<App />)
+        userEvent.selectOptions(
+            // Find the select element
+            await screen.findByRole('combobox'),
+            // Find and select the Ireland option
+            await screen.findByRole('option', { name: 'Доллар США' })
+        )
+        expect(
+            (screen.getByText('Доллар США') as HTMLOptionElement).selected
+        ).toBeTruthy()
     })
     test('axios', async () => {
         const users = [{ name: 'Alexander' }]

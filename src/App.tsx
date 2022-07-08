@@ -16,6 +16,7 @@ function App() {
     const [selectedState, setSelectedState] = useState('Доллар США')
 
     useEffect(() => {
+        let isMounted = true
         FetchAsyncApi().then((response) => {
             if (response)
                 response.json().then((res: Res) => {
@@ -28,9 +29,14 @@ function App() {
                             </option>
                         )
                     })
-                    setState(renderArray)
+                    if (isMounted) {
+                        setState(renderArray)
+                    }
                 })
         })
+        return () => {
+            isMounted = false
+        }
     }, [])
     console.log('render')
 
